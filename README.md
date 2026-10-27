@@ -28,9 +28,18 @@ npx cap sync android
 cd android && ./gradlew assembleDebug
 # Output: android/app/build/outputs/apk/debug/app-debug.apk
 ```
-The prebuilt debug APK is attached to the GitHub Release v0.3.0.
+The prebuilt debug APK is attached to the latest GitHub Release.
 
 ---
+## Goal
+**Win:** reach Cycle 20 (1 cycle = 120 s, so 40 minutes of game time) with all 3 settlers alive. You can keep playing after you win. **Lose:** every settler dies.
+
+## v0.4.0 air loop
+- CO₂ sinks and O₂ rises. Settlers breathe from their own tile or the tile above it, whichever has more O₂.
+- The **Scrubber** is available from the start. It turns CO₂ into O₂ 1:1 and uses 5 power/s.
+- **Air Synthesis** research (60 pts) unlocks the **O₂ Vat** (15 stone). It makes 0.3 O₂/s from power alone (8/s) and stops above a gas pressure of 1.8. A Scrubber plus a Vat makes a sustainable air loop without lichen.
+- Settlers can't dig straight below their feet (diagonal-down is fine). Trapped settlers get a red **!** and a "TRAPPED" label. Unreachable jobs show a red ✕, the HUD counts them, and settlers skip them.
+
 ## Gameplay
 - The asteroid is a 60×44 grid of Stone, Soil, Lichen, and Bedrock tiles, with random caves. Some caves hold old air and some hold pockets of CO₂.
 - Every open tile tracks how much O₂ and CO₂ it holds, and the gas spreads between tiles. CO₂ sinks and O₂ rises.
@@ -53,10 +62,10 @@ The prebuilt debug APK is attached to the GitHub Release v0.3.0.
 - **Germs and disease:** germs spread through gas and slowly die off. Old CO₂ pockets start out full of germs. Breathing germy air builds exposure until a settler catches *Grey Cough*. A sick settler works at half speed, uses more O₂ and spreads germs. They recover after about 90 s, or about 4× faster resting on a Med Cot.
 - **Stress (0–100):** it goes up from holding breath, hunger, sickness, bad temperatures and working, and goes down while idle. A settler above 70 heads to a Couch if one exists (−8/s). At 100 they break down and do nothing for 20 s.
 - **Research:** a Research Desk (6 stone) gets research jobs while a tech is selected (tap 🔬 Research). Tech tree:
-  - Air Scrubbing (30 pts) unlocks the Scrubber (CO₂ → O₂, uses power).
+  - Air Synthesis (60 pts) unlocks the O₂ Vat.
   - Field Medicine (30 pts) unlocks the Med Cot.
   - Leisure (40 pts) unlocks the Couch.
-  - Thermal Control (50 pts, needs Air Scrubbing) unlocks the Cooler.
+  - Thermal Control (50 pts, needs Air Synthesis) unlocks the Cooler.
 - **Priorities (1–9):** P− / P / P+ set the priority for new jobs, and the 🔢 Set Prio tool changes an existing job's priority. Settlers do the highest-priority job they can reach first, nearest first. Breathing, eating, a Med Cot when sick and a Couch when stressed come before any job.
 - **Save/Load:** the game saves to localStorage automatically every 30 s, and there are 💾/📂 buttons. A saved colony loads automatically when you start the game.
 - **Start:** 30 stone (enough for an Aerator, a Farm and a Dynamo) and 10 food.

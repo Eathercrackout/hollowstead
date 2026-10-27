@@ -1,12 +1,13 @@
 // Hollowstead simulation core (no DOM). Tiles, gas, colonists, jobs.
 const HS=(()=>{
 const W=60,H=44,EMPTY=0,ROCK=1,SOIL=2,LICHEN=3,BEDROCK=4;
-const B_NONE=0,B_LADDER=1,B_AERATOR=2,B_FARM=3,B_DYNAMO=4,B_POD=5,B_DESK=6,B_SCRUB=7,B_COT=8,B_COUCH=9,B_COOLER=10;
-const TECH={scrub:{name:'Air Scrubbing',cost:30,unlock:B_SCRUB,desc:'Scrubber: CO2 to O2, uses power'},medcot:{name:'Field Medicine',cost:30,unlock:B_COT,desc:'Med Cot: sick settlers heal fast'},couch:{name:'Leisure',cost:40,unlock:B_COUCH,desc:'Couch: relieves stress'},cooler:{name:'Thermal Control',cost:50,unlock:B_COOLER,desc:'Cooler: pumps heat out, uses power',req:'scrub'}};
-const LOCK={7:'scrub',8:'medcot',9:'couch',10:'cooler'};
-const BAT_CAP=1000,AER_W=6,FARM_W=2,CRANK_W=40,GROW=90,CAL_MAX=1000,CAL_RATE=1000/150;
+const B_NONE=0,B_LADDER=1,B_AERATOR=2,B_FARM=3,B_DYNAMO=4,B_POD=5,B_DESK=6,B_SCRUB=7,B_COT=8,B_COUCH=9,B_COOLER=10,B_VAT=11;
+const WIN_CYCLES=20,CYCLE=120;
+const TECH={medcot:{name:'Field Medicine',cost:30,unlock:B_COT,desc:'Med Cot: sick settlers heal fast'},couch:{name:'Leisure',cost:40,unlock:B_COUCH,desc:'Couch: relieves stress'},vat:{name:'Air Synthesis',cost:60,unlock:B_VAT,desc:'Oxygen Vat: makes O2 from power alone',},cooler:{name:'Thermal Control',cost:50,unlock:B_COOLER,desc:'Cooler: pumps heat out, uses power',req:'vat'}};
+const LOCK={8:'medcot',9:'couch',10:'cooler',11:'vat'};
+const BAT_CAP=1000,AER_W=6,FARM_W=2,CRANK_W=60,GROW=90,CAL_MAX=1000,CAL_RATE=1000/150;
 const HARD={1:3,2:1.5,3:1.2};             // seconds to dig
-const COST={1:{stone:1},2:{stone:10},3:{stone:4},4:{stone:8},6:{stone:6},7:{stone:12},8:{stone:6},9:{stone:8},10:{stone:12}};
+const COST={1:{stone:1},2:{stone:10},3:{stone:4},4:{stone:8},6:{stone:6},7:{stone:12},8:{stone:6},9:{stone:8},10:{stone:12},11:{stone:15}};
 const NAMES=['Bram','Ilse','Toma','Vero','Kade','Nell'];
 let S;
 const idx=(x,y)=>y*W+x, inb=(x,y)=>x>=0&&y>=0&&x<W&&y<H;
@@ -43,12 +44,13 @@ function gasStep(dt){
   const j=i+1;if(!t[j]){const a=(o2[i]-o2[j])*k,c=(co2[i]-co2[j])*k;o2[i]-=a;o2[j]+=a;co2[i]-=c;co2[j]+=c}
   const d=i+W;if(!t[d]){let a=(o2[i]-o2[d])*k,c=(co2[i]-co2[d])*k;
    // buoyancy: CO2 sinks, O2 rises (swap)
-   const sw=Math.min(co2[i],o2[d])*k*0.5;a+=sw;c-=sw;o2[i]-=a;o2[d]+=a;co2[i]-=c;co2[d]+=c}}
+   const sw=Math.min(co2[i],o2[d])*k*0.5;a-=sw;c+=sw;o2[i]-=a;o2[d]+=a;co2[i]-=c;co2[d]+=c}}
  // aerators
  for(const a of S.aer){const i=idx(a.x,a.y);a.on=a.lichen>0&&o2[i]+co2[i]<1.8&&S.bat>=AER_W*dt;
   if(a.on){T[i]+=0.6*dt;o2[i]+=0.55*dt;a.lichen=Math.max(0,a.lichen-0.12*dt);S.bat-=AER_W*dt}}
  for(const m of S.misc){const i=idx(m.x,m.y);m.on=false;
-  if(m.bt==B_SCRUB&&co2[i]>0.05&&S.bat>=5*dt){const q=Math.min(co2[i],0.4*dt);co2[i]-=q;o2[i]+=q*0.8;S.bat-=5*dt;T[i]+=0.3*dt;m.on=true}
+  if(m.bt==B_SCRUB&&co2[i]>0.02&&S.bat>=5*dt){const q=Math.min(co2[i],0.4*dt);co2[i]-=q;o2[i]+=q*1.0;S.bat-=5*dt;T[i]+=0.3*dt;m.on=true}
+  if(m.bt==B_VAT&&o2[i]+co2[i]<1.8&&S.bat>=8*dt){o2[i]+=0.3*dt;S.bat-=8*dt;T[i]+=0.2*dt;m.on=true}
   if(m.bt==B_COOLER&&T[i]>18&&S.bat>=4*dt){T[i]-=6*dt;S.bat-=4*dt;m.on=true}}}
 // ---------- navigation ----------
 const solid=(x,y)=>!inb(x,y)||S.t[idx(x,y)]!=EMPTY;
@@ -62,9 +64,15 @@ function nbrs(x,y){const out=[];
  // step up 1 onto ledge (climb small bump)
  for(const dx of[-1,1]){const nx=x+dx;if(solid(nx,y)&&!solid(nx,y-1)&&!solid(x,y-1)&&solid(nx,y))out.push([nx,y-1])}
  return out}
-function bfs(sx,sy,goal,maxN=4000){const prev=new Map(),k0=idx(sx,sy);prev.set(k0,-1);const q=[[sx,sy]];let n=0;
- while(q.length&&n++<maxN){const[x,y]=q.shift();if(goal(x,y)){const p=[];let k=idx(x,y);while(k!=-1&&k!=k0){p.unshift([k%W,k/W|0]);k=prev.get(k)}return{x,y,path:p}}
+function bfs(sx,sy,goal,maxN=4000){const prev=new Map(),k0=idx(sx,sy);prev.set(k0,-1);const q=[[sx,sy]];let n=0,h=0;
+ while(h<q.length&&n++<maxN){const[x,y]=q[h++];if(goal(x,y)){const p=[];let k=idx(x,y);while(k!=-1&&k!=k0){p.unshift([k%W,k/W|0]);k=prev.get(k)}return{x,y,path:p}}
   for(const[nx,ny]of nbrs(x,y)){const k=idx(nx,ny);if(!prev.has(k)){prev.set(k,idx(x,y));q.push([nx,ny])}}}return null}
+function flood(sx,sy){const seen=new Set([idx(sx,sy)]),q=[[sx,sy]];for(let h=0;h<q.length;h++){const[x,y]=q[h];for(const[nx,ny]of nbrs(x,y)){const k=idx(nx,ny);if(!seen.has(k)){seen.add(k);q.push([nx,ny])}}}return seen}
+function reach(){const all=new Set();for(const c of S.cols){if(!c.alive)continue;const f=flood(Math.round(c.x),Math.round(c.y));
+  const podOk=[...f].some(k=>near(k%W,k/W|0,{type:'x',x:S.pod.x,y:S.pod.y}));
+  if(!podOk&&!c.trapped){c.trapped=true;S.log.push(c.name+' is TRAPPED — build a ladder or dig them out')}else if(podOk)c.trapped=false;
+  for(const k of f)all.add(k)}
+ for(const j of S.jobs){let ok=false;for(const k of all){if(near(k%W,k/W|0,j)){ok=true;break}}j.unr=!ok}}
 // ---------- jobs ----------
 function addJob(type,x,y,bt,pri=5){if(!inb(x,y))return false;const i=idx(x,y);
  if(S.jobs.some(j=>j.x==x&&j.y==y))return false;
@@ -78,18 +86,21 @@ function setPri(x,y,p){let n=0;for(const j of S.jobs)if(j.x==x&&j.y==y){j.pri=p;
 function cancelAt(x,y){S.jobs=S.jobs.filter(j=>{if(j.x==x&&j.y==y){for(const c of S.cols)if(c.job==j){c.job=null;c.path=[]}return false}return true})}
 function canAfford(bt){const c=COST[bt];return Object.keys(c).every(k=>S.res[k]>=c[k])}
 const tgt=j=>j.type=='supply'&&j.stage==0?S.pod:j;
-const near=(x,y,j)=>{const t=tgt(j);return Math.abs(x-t.x)<=1&&Math.abs(y-t.y)<=(j.type=='dig'?2:1)&&!(x==t.x&&y==t.y&&j.type=='dig')};
+const near=(x,y,j)=>{const t=tgt(j),dx=t.x-x,dy=t.y-y;if(Math.abs(dx)>1)return false;
+ if(j.type=='dig')return dy>=-2&&dy<=1&&!(dx==0&&dy>=0); // never dig own tile or straight below feet
+ return Math.abs(dy)<=1};
 function colStep(c,dt){if(!c.alive)return;
  if(c.carry&&(!c.job||c.job.type!='supply')){S.res.lichen+=c.carry;c.carry=0}
  const cx=Math.round(c.x),cy=Math.round(c.y),hi=idx(cx,Math.max(0,cy));
  // breathing: draw O2 from head cell, exhale CO2
- const need=0.1*dt;if(S.o2[hi]>=0.25){const take=Math.min(need,S.o2[hi]);S.o2[hi]-=take;S.co2[hi]+=take*0.6;c.breath=Math.min(100,c.breath+25*dt)}
+ const up=cy>0&&!S.t[idx(cx,cy-1)]?idx(cx,cy-1):hi,bi=S.o2[up]>S.o2[hi]?up:hi;
+ const need=0.1*dt;if(S.o2[bi]>=0.25){const hi2=hi;{const hi=bi;const take=Math.min(need,S.o2[hi]);S.o2[hi]-=take;S.co2[hi]+=take*0.6;c.breath=Math.min(100,c.breath+25*dt)}}
  else c.breath-=100/40*dt;
  const tmp=S.T[hi];S.T[hi]+=0.04*dt;
  if(c.sick>0){c.sick-=dt*(c.resting?4:1);S.G[hi]+=20*dt;if(c.sick<=0){c.sick=0;S.log.push(c.name+' recovered')}}
  else{if(S.G[hi]>30)c.exp+=S.G[hi]*0.0004*dt;else c.exp=Math.max(0,c.exp-0.01*dt);if(c.exp>1){c.exp=0;c.sick=90;S.log.push(c.name+' caught Grey Cough')}}
- let ds=-0.4;if(S.o2[hi]<0.25)ds+=2;if(c.cal<200)ds+=1;if(c.sick)ds+=0.6;if(tmp>35||tmp<6)ds+=1.2;if(c.job)ds+=0.45;if(c.relax)ds=-8;
- c.st=Math.max(0,Math.min(100,c.st+ds*dt));
+ let ds=-0.4;if(S.o2[bi]<0.25)ds+=2;if(c.cal<200)ds+=1;if(c.sick)ds+=0.6;if(tmp>35||tmp<6)ds+=1.2;if(c.job)ds+=0.45;if(c.relax)ds=-8;
+ if(c.calm>0){c.calm-=dt;if(ds>0)ds*=0.3}c.st=Math.max(0,Math.min(c.calm>0?90:100,c.st+ds*dt));
  if(tmp>45){c.hp-=3*dt}
  if(c.st>=100&&!c.brk){c.brk=20;S.log.push(c.name+' had a breakdown');if(c.job){c.job.taken=null;c.job=null}c.path=[]}
  if(c.sick)S.o2[hi]=Math.max(0,S.o2[hi]-0.05*dt);
@@ -102,9 +113,11 @@ function colStep(c,dt){if(!c.alive)return;
  if(c.path.length){const[tx,ty]=c.path[0],dx=tx-c.x,dy=ty-c.y,d=Math.hypot(dx,dy),sp=3.2*dt;
   if(d<=sp){c.x=tx;c.y=ty;c.path.shift()}else{c.x+=dx/d*sp;c.y+=dy/d*sp}return}
  c.x=cx;c.y=cy;
- if(c.brk>0){c.brk-=dt;c.state='breakdown';if(c.brk<=0){c.brk=0;c.st=60}return}
+ if(c.brk>0){c.brk-=dt;c.state='breakdown';if(c.brk<=0){c.brk=0;c.st=30;c.calm=120}return}
+ if(!c.eating&&c.cal<150&&S.res.food>=1&&c.breath>20){if(c.job){c.job.taken=null;c.job=null}S.res.food-=1;c.eating=3}
+ if(c.eating>0){c.eating-=dt;c.state='eating';if(c.eating<=0){c.cal=Math.min(CAL_MAX,c.cal+500)}return}
  // seek air
- if(c.breath<45||(S.o2[hi]<0.25&&c.breath<90)){if(c.job){c.job.taken=null;c.job=null}c.state='seeking air';
+ if(c.breath<45||(S.o2[bi]<0.25&&c.breath<90)){if(c.job){c.job.taken=null;c.job=null}c.state='seeking air';
   const r=bfs(cx,cy,(x,y)=>S.o2[idx(x,y)]>0.5);if(r&&r.path.length){c.path=r.path}return}
  // eat when hungry (interrupts non-critical work)
  if(c.eating>0){c.eating-=dt;c.state='eating';if(c.eating<=0){c.cal=Math.min(CAL_MAX,c.cal+500)}return}
@@ -130,7 +143,7 @@ function colStep(c,dt){if(!c.alive)return;
   if(c.work>=need){finish(j);c.job=null;c.work=0}return}
  // find job: nearest reachable unassigned
  for(const j of S.jobs)if(!j.taken&&j.type=='supply'&&j.stage==1)j.stage=0;
- const free=S.jobs.filter(j=>!j.taken&&(j.type!='build'||canAfford(j.bt))).sort((a,b)=>(b.pri||5)-(a.pri||5));
+ const free=S.jobs.filter(j=>!j.taken&&!j.unr&&(j.type!='build'||canAfford(j.bt))).sort((a,b)=>(b.pri||5)-(a.pri||5));
  if(free.length){let r=null,top=free.length?free[0].pri||5:0;for(const p of [...new Set(free.map(j=>j.pri||5))]){const fp=free.filter(j=>(j.pri||5)==p);r=bfs(cx,cy,(x,y)=>fp.some(j=>near(x,y,j)));if(r)break}
   if(r){const j=free.find(j=>near(r.x,r.y,j));j.taken=c;c.job=j;c.work=0;c.path=r.path;c.state='walking';return}}
  c.state='idle'}
@@ -144,13 +157,14 @@ function auto(dt){
  for(const a of S.aer)if(a.lichen<1.5&&S.res.lichen>=1&&!has('supply',a.x,a.y))S.jobs.push({type:'supply',x:a.x,y:a.y,stage:0,taken:null,pri:7});
  for(const f of S.farms){if(f.g<GROW){const pw=S.bat>=FARM_W*dt;if(pw)S.bat-=FARM_W*dt;f.g+=dt*(pw?1:0.4)}else if(!has('harvest',f.x,f.y))S.jobs.push({type:'harvest',x:f.x,y:f.y,taken:null,pri:6})}
  if(S.rs.cur)for(const m of S.misc)if(m.bt==B_DESK&&!has('research',m.x,m.y)){S.jobs.push({type:'research',x:m.x,y:m.y,taken:null,pri:4});break}
- const need=S.aer.length||S.farms.length||S.misc.some(m=>m.bt==B_SCRUB||m.bt==B_COOLER);if(need&&S.bat<BAT_CAP*0.6)for(const d of S.dyn)if(!has('operate',d.x,d.y)){S.jobs.push({type:'operate',x:d.x,y:d.y,taken:null,pri:6});break}}
-function pickTech(id){const tc=TECH[id];if(!tc||S.rs.done[id]||(tc.req&&!S.rs.done[tc.req]))return false;if(S.rs.cur!=id){S.rs.cur=id;S.rs.pts=0}return true}
+ const need=S.aer.length||S.farms.length||S.misc.some(m=>m.bt==B_SCRUB||m.bt==B_COOLER||m.bt==B_VAT);if(need&&S.bat<BAT_CAP*0.6)for(const d of S.dyn)if(!has('operate',d.x,d.y)){S.jobs.push({type:'operate',x:d.x,y:d.y,taken:null,pri:6});break}}
+function pickTech(id){const tc=TECH[id];if(!tc||S.rs.done[id]||(tc.req&&!S.rs.done[tc.req]))return false;if(S.rs.cur!=id){S.rs.prog=S.rs.prog||{};if(S.rs.cur)S.rs.prog[S.rs.cur]=S.rs.pts;S.rs.cur=id;S.rs.pts=S.rs.prog[id]||0}return true}
 const ARR=['t','b','o2','co2','T','G'];
 function save(){const o={v:3};for(const k in S){if(ARR.includes(k))o[k]=Array.from(S[k],v=>Math.round(v*1000)/1000);else if(k=='jobs')o.jobs=S.jobs.map(j=>({...j,taken:null,stage:0}));else if(k=='cols')o.cols=S.cols.map(c=>({...c,job:null,path:[],carry:0,relax:false}));else o[k]=S[k]}
  o.res={...S.res};for(const c of S.cols)o.res.lichen+=c.carry||0;return JSON.stringify(o)}
 function load(str){const o=JSON.parse(str);if(!o||o.v!=3)throw new Error('bad save');const C={t:Uint8Array,b:Uint8Array};for(const k of ARR)o[k]=new(C[k]||Float32Array)(o[k]);delete o.v;S=o;return S}
-function step(dt){if(S.over)return;S.time+=dt;gasStep(dt);auto(dt);for(const c of S.cols)colStep(c,dt);
- if(S.cols.every(c=>!c.alive))S.over=true}
-return{newGame,step,addJob,cancelAt,setPri,pickTech,save,load,TECH,LOCK,B_DESK,B_SCRUB,B_COT,B_COUCH,B_COOLER,get S(){return S},W,H,idx,EMPTY,ROCK,SOIL,LICHEN,BEDROCK,B_LADDER,B_AERATOR,B_FARM,B_DYNAMO,B_POD,BAT_CAP,CAL_MAX,GROW,COST}})();
+function step(dt){if(S.over)return;S.time+=dt;S._rt=(S._rt||0)+dt;if(S._rt>=2||S._rt==dt){S._rt=0;reach()}gasStep(dt);auto(dt);for(const c of S.cols)colStep(c,dt);
+ if(S.cols.every(c=>!c.alive))S.over=true;
+ if(!S.won&&S.time>=WIN_CYCLES*CYCLE&&S.cols.every(c=>c.alive)){S.won=true;S.log.push('VICTORY: '+WIN_CYCLES+' cycles with everyone alive!')}}
+return{near,reach,WIN_CYCLES,CYCLE,B_VAT,newGame,step,addJob,cancelAt,setPri,pickTech,save,load,TECH,LOCK,B_DESK,B_SCRUB,B_COT,B_COUCH,B_COOLER,get S(){return S},W,H,idx,EMPTY,ROCK,SOIL,LICHEN,BEDROCK,B_LADDER,B_AERATOR,B_FARM,B_DYNAMO,B_POD,BAT_CAP,CAL_MAX,GROW,COST}})();
 if(typeof module!='undefined')module.exports=HS;

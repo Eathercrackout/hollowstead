@@ -1,0 +1,21 @@
+  [42] t=0s roomO2=1.00 roomCO2=0.00 stone=30 lichen=8 food=10 bat=300 bld= research= cols=walking/air100/st0,walking/air100/st0,walking/air100/st0
+  [42] t=600s roomO2=1.46 roomCO2=0.03 stone=53 lichen=0 food=21 bat=637 bld=7,6,11,8 research=vat,medcot cols=walking/air100/st12,idle/air100/st0,idle/air100/st0
+  [42] t=1200s roomO2=1.72 roomCO2=0.04 stone=59 lichen=0 food=45 bat=930 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=cranking/air100/st0,idle/air100/st0,idle/air100/st0
+  [42] t=1800s roomO2=1.73 roomCO2=0.04 stone=59 lichen=0 food=69 bat=832 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=idle/air100/st0,idle/air100/st0,idle/air100/st0
+  [42] t=2400s roomO2=1.73 roomCO2=0.04 stone=59 lichen=0 food=95 bat=776 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=idle/air100/st0,idle/air100/st0,idle/air100/st0
+RESULT seed 42: t=2700s alive=3/3 won=true minRoomO2=0.84 minRoomO2(after 10min)=1.45 breakdowns=0 deaths=[]
+  [7] t=0s roomO2=1.00 roomCO2=0.00 stone=30 lichen=8 food=10 bat=300 bld= research= cols=walking/air100/st0,walking/air100/st0,walking/air100/st0
+  [7] t=600s roomO2=1.32 roomCO2=0.07 stone=39 lichen=0 food=29 bat=693 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=idle/air100/st0,idle/air100/st0,idle/air100/st0
+  [7] t=1200s roomO2=1.66 roomCO2=0.08 stone=39 lichen=0 food=53 bat=688 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=idle/air100/st0,idle/air100/st0,idle/air100/st0
+  [7] t=1800s roomO2=1.70 roomCO2=0.08 stone=39 lichen=0 food=83 bat=672 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=idle/air100/st0,idle/air100/st0,idle/air100/st0
+  [7] t=2400s roomO2=1.70 roomCO2=0.08 stone=39 lichen=0 food=109 bat=671 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=idle/air100/st0,idle/air100/st0,idle/air100/st0
+RESULT seed 7: t=2700s alive=3/3 won=true minRoomO2=0.67 minRoomO2(after 10min)=1.32 breakdowns=0 deaths=[]
+  [123] t=0s roomO2=1.00 roomCO2=0.00 stone=30 lichen=8 food=10 bat=300 bld= research= cols=walking/air100/st0,walking/air100/st0,walking/air100/st0
+  [123] t=600s roomO2=1.71 roomCO2=0.07 stone=68 lichen=60 food=27 bat=845 bld=7,6,11,8,9 research=vat,medcot,couch cols=idle/air100/st6,idle/air100/st0,researching/air100/st4
+  [123] t=1200s roomO2=1.72 roomCO2=0.08 stone=68 lichen=52 food=53 bat=817 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=idle/air100/st0,idle/air100/st0,idle/air100/st0
+  [123] t=1800s roomO2=1.71 roomCO2=0.08 stone=68 lichen=48 food=83 bat=655 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=walking/air100/st0,cranking/air100/st0,idle/air100/st0
+  [123] t=2400s roomO2=1.72 roomCO2=0.08 stone=68 lichen=44 food=109 bat=847 bld=7,6,11,8,9 research=vat,medcot,couch,cooler cols=idle/air100/st0,idle/air100/st0,idle/air100/st0
+RESULT seed 123: t=2700s alive=3/3 won=true minRoomO2=0.92 minRoomO2(after 10min)=1.71 breakdowns=0 deaths=[]
+UNATTENDED seed 42: over=true at t=252s won=false
+UNATTENDED seed 7: over=true at t=223s won=false
+UNATTENDED seed 123: over=true at t=254s won=false

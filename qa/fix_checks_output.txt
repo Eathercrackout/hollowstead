@@ -1,0 +1,16 @@
+PASS CO2 sinks (bottom>top) top=0.92 bottom=6.96
+PASS no digging straight below feet (near rule) below=false, diagonal=true, above=true
+PASS diagonal-down dig still allowed 
+PASS unreachable job flagged 
+PASS reachable job not flagged 
+PASS trapped settler flagged Toma is TRAPPED — build a ladder or dig them out
+PASS trapped cleared after ladder 
+PASS breakdown triggers brk=19.4
+PASS post-breakdown stress reset to ~30 st=28
+PASS no immediate re-breakdown (calm cap 90) 
+PASS research progress kept when switching 
+PASS O2 Vat makes O2 from power +18.0 O2/min, bat used 479
+PASS Scrubber returns >= O2 per CO2 (1:1) and is unlocked at start CO2 -17.6 O2 +17.6
+PASS win condition at cycle 20 
+PASS save/load keeps new fields 
+PASS perf: 60 unreachable jobs 0.98 ms per sim-second

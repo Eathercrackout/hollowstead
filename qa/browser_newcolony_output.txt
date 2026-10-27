@@ -1,0 +1,12 @@
+{
+ "saveBefore": 500,
+ "overReached": true,
+ "manualSaveOfDeadColony": false,
+ "saveTimeAfterNewColony": 0,
+ "reloadLoads": {
+  "t": 0,
+  "over": false
+ },
+ "victory": true,
+ "errs": []
+}

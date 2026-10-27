@@ -1,0 +1,11 @@
+const {chromium}=require('playwright-core');
+(async()=>{const b=await chromium.launch({executablePath:process.env.HOME+'/.cache/ms-playwright/chromium-1248/chrome-linux64/chrome'});const pg=await b.newPage({viewport:{width:390,height:844},hasTouch:true,isMobile:true});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('http://localhost:8765/?nc');await pg.evaluate(()=>localStorage.clear());await pg.reload();await pg.waitForTimeout(300);
+await pg.evaluate(()=>{__hs.S.time=500;__hs.press('save')});const before=await pg.evaluate(()=>JSON.parse(localStorage.hsSave).time|0);
+await pg.evaluate(()=>{const S=__hs.S;S.cols.forEach(c=>c.breath=0.01);S.o2.fill(0)});await pg.waitForTimeout(1500);const over=await pg.evaluate(()=>__hs.S.over);
+const manual=await pg.evaluate(()=>{__hs.press('save');return JSON.parse(localStorage.hsSave).over||false});
+await pg.screenshot({path:__dirname+'/screens/portrait_10_game_over_v04.png'});
+await pg.evaluate(()=>__hs.press('restart'));const afterNew=await pg.evaluate(()=>JSON.parse(localStorage.hsSave).time|0);await pg.reload();await pg.waitForTimeout(400);
+const loaded=await pg.evaluate(()=>({t:__hs.S.time|0,over:__hs.S.over}));
+await pg.evaluate(()=>{__hs.S.time=20*120-0.5});await pg.waitForTimeout(1200);await pg.screenshot({path:__dirname+'/screens/portrait_11_victory.png'});const won=await pg.evaluate(()=>__hs.S.won);
+const r={saveBefore:before,overReached:over,manualSaveOfDeadColony:manual,saveTimeAfterNewColony:afterNew,reloadLoads:loaded,victory:won,errs};console.log(JSON.stringify(r));require('fs').writeFileSync(__dirname+'/browser_newcolony_output.txt',JSON.stringify(r,null,1));await b.close()})();

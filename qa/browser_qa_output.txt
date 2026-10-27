@@ -1,0 +1,24 @@
+portrait tap on HUD panel created job(s): 0
+portrait button not visible: tech:scrub
+portrait tool buttons visible after scroll: ["dynamo","desk","scrub","cot","couch"]
+portrait pinch zoom 28.0 -> 80.0 jobs after pinch (should be unchanged) 0
+portrait game over reached true
+portrait reload after death: autosave time null loaded {"t":0,"over":false,"alive":3}
+portrait 20s after reload {"over":false,"alive":3}
+portrait corrupt save -> errors? [] game running true
+portrait labels wider than their button [["research",67,50]]
+portrait JS errors []
+landscape tap on HUD panel created job(s): 0
+landscape button not visible: tech:scrub
+landscape tool buttons visible after scroll: ["farm","dynamo","desk","scrub","cot","couch","vat","cooler","prio","cancel"]
+landscape pinch zoom 28.0 -> 80.0 jobs after pinch (should be unchanged) 0
+landscape game over reached true
+landscape labels wider than their button []
+landscape JS errors []
+small tap on HUD panel created job(s): 0
+small button not visible: tech:scrub
+small tool buttons visible after scroll: ["farm","dynamo","desk","scrub"]
+small pinch zoom 28.0 -> 80.0 jobs after pinch (should be unchanged) 0
+small game over reached true
+small labels wider than their button [["ovl",41,40],["research",67,40],["save",42,40],["load",43,40]]
+small JS errors []

@@ -34,6 +34,15 @@ The prebuilt debug APK is attached to the latest GitHub Release.
 ## Goal
 **Win:** reach Cycle 20 (1 cycle = 120 s, so 40 minutes of game time) with all 3 settlers alive. You can keep playing after you win. **Lose:** every settler dies.
 
+## v0.5.0 look and UI
+v0.5.0 replaces the flat-colour visuals with an original hand-drawn cutaway style.
+- **Art:** procedural layered rock, soil and lichen textures with outlines and shading, plus soft translucent gas (light-blue O₂, dark-grey CO₂). Buildings are rounded and chunky. Settlers have round heads, blink, bob while idle and change expression with stress. The background is a dark vignette.
+- **UI:**
+  - A bottom category bar (Dig / Base / Oxygen / Food / Power / Colony / Tools / Menu) opens building menus showing each building's cost.
+  - A colony vitals panel sits top-left, and the speed and overlay cluster (Normal / O₂ / Heat / Germs) sits top-right.
+  - Tapping a tile or settler opens an inspector card.
+- **Performance:** tile art is pre-rendered and only redrawn when tiles change. Gas is drawn as a 1-pixel-per-tile image that is smoothed and scaled. The headless browser holds 60 fps at 4×.
+
 ## v0.4.0 air loop
 - CO₂ sinks and O₂ rises. Settlers breathe from their own tile or the tile above it, whichever has more O₂.
 - The **Scrubber** is available from the start. It turns CO₂ into O₂ 1:1 and uses 5 power/s.

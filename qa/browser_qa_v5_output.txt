@@ -1,0 +1,30 @@
+portrait HUD tap jobs created 0
+portrait dig via tap queued false
+portrait builds queued [2,4]
+portrait inspector {"x":30,"y":21}
+portrait pinch zoom -> 80.0
+portrait fps at 4x 60.0 time 39
+portrait over true
+portrait new colony save time 0
+portrait won true
+portrait JS errors []
+landscape HUD tap jobs created 0
+landscape dig via tap queued true
+landscape builds queued [2,4]
+landscape inspector {"x":30,"y":21}
+landscape pinch zoom -> 80.0
+landscape fps at 4x 60.0 time 39
+landscape over true
+landscape new colony save time 0
+landscape won true
+landscape JS errors []
+small HUD tap jobs created 0
+small dig via tap queued false
+small builds queued [2]
+small inspector {"x":30,"y":21}
+small pinch zoom -> 80.0
+small fps at 4x 60.0 time 37
+small over true
+small new colony save time 0
+small won true
+small JS errors []
